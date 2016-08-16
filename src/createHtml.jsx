@@ -45,6 +45,7 @@ function vwo3() {
  * @param   {string|Array<script>}  [options.script]
  * @param   {string|Array<script>}  [options.style]
  * @param   {boolean}               [options.static=false]
+ * @param   {object}                [options.env={}]
  *
  * @param   {object}                [options.newRelic]
  * @param   {string}                [options.newRelic.licenseKey]
@@ -100,6 +101,7 @@ export default function(options) {
 
     let description = options && options.description;
     let canonical = options && options.canonical;
+    const env = options && options.env || {};
 
     return (
       <html lang="en-AU">
@@ -136,6 +138,12 @@ export default function(options) {
           {visualWebsiteOptimizer ? <script type="text/javascript" dangerouslySetInnerHTML={{__html: vwo2()}}></script> : null}
           {visualWebsiteOptimizer ? <script type="text/javascript" dangerouslySetInnerHTML={{__html: vwo3()}}></script> : null}
 
+          <script
+            type="text/javascript"
+            dangerouslySetInnerHTML={{
+              __html: `window.process={env:${JSON.stringify(env)}};`
+            }}
+          ></script>
         </head>
         <body>
 

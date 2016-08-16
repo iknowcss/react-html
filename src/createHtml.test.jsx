@@ -1,10 +1,16 @@
 import React from 'react';
-import {renderToStaticMarkup} from 'react-dom/server';
 import {expect} from 'chai';
 import render from 'react-testutils-render';
 import $ from 'react-testutils-query';
 import Helmet from 'react-helmet';
 import createHtml from './createHtml';
+
+const getScripts = element => element
+  .find('script')
+  .map(s => {
+    const scriptContent = s.prop('dangerouslySetInnerHTML');
+    return (scriptContent && scriptContent.__html) || '';
+  });
 
 describe('createHtml()', () => {
 
@@ -41,9 +47,7 @@ describe('createHtml()', () => {
       const Html = createHtml({visualWebsiteOptimizer: false});
       const html = $(render(<Html/>).element);
 
-      expect(html.find('script').first().hasProp('dangerouslySetInnerHTML'))
-        .to.be.false
-      ;
+      getScripts(html).forEach(s => expect(s).not.to.contain(defaultVwoAccountId));
 
     });
 
@@ -171,7 +175,7 @@ describe('createHtml()', () => {
         </Html>
       ).element);
 
-      var metaRobots = html
+      const metaRobots = html
         .find('meta').map(r => r)
         .filter(m => m.prop('name') === 'robots');
       expect(metaRobots).to.have.length(1);
@@ -193,6 +197,36 @@ describe('createHtml()', () => {
 
     });
 
+  });
+
+  describe('env', () => {
+    const ENV_SCRIPT_REGEXP = /^window\.process=\{env:(\{.*\})\};$/;
+
+    it('sets the process.env object when the env option is specified', () => {
+      const Html = createHtml({env: {
+        NODE_ENV: 'production'
+      }});
+      const html = $(render(<Html/>).element);
+      const scripts = getScripts(html);
+
+      const envScript = scripts.filter(s => ENV_SCRIPT_REGEXP.test(s));
+      expect(envScript).to.have.length(1);
+      const envJson = envScript[0].match(ENV_SCRIPT_REGEXP)[1];
+      expect(JSON.parse(envJson)).to.eql({
+        NODE_ENV: 'production'
+      });
+    });
+
+    it('sets the process.env object to an empty object by default', () => {
+      const Html = createHtml();
+      const html = $(render(<Html/>).element);
+      const scripts = getScripts(html);
+
+      const envScript = scripts.filter(s => ENV_SCRIPT_REGEXP.test(s));
+      expect(envScript).to.have.length(1);
+      const envJson = envScript[0].match(ENV_SCRIPT_REGEXP)[1];
+      expect(JSON.parse(envJson)).to.eql({});
+    });
   });
 
 });
