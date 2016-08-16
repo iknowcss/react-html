@@ -93,12 +93,17 @@ Creates a React component for rendering generic meta-data and layout.
   - `applicationId : string` Required. The application ID.
 - `visualWebsiteOptimizer : boolean` Optional. Whether the VWO script is enabled. Defaults to `false`.
 - `googleTagManagerId : string` Optional. The GTM ID. Determines whether the GTM script is enabled.
+- `env : Object` Optional. Environment variables that will be added to `window.process.env`. Defaults to `{}`.
 
 **Returns:**
 
 A React component.
 
 ## Change log
+
+# 0.9.0
+
+- add: `env` option to set the `process.env`
 
 # 0.8.0
 
