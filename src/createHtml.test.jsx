@@ -1,4 +1,5 @@
 import React from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
 import {expect} from 'chai';
 import render from 'react-testutils-render';
 import $ from 'react-testutils-query';
@@ -170,7 +171,11 @@ describe('createHtml()', () => {
         </Html>
       ).element);
 
-      expect(html.find('meta[name=robots]').prop('content')).to.be.equal('noindex, nofollow');
+      var metaRobots = html
+        .find('meta').map(r => r)
+        .filter(m => m.prop('name') === 'robots');
+      expect(metaRobots).to.have.length(1);
+      expect(metaRobots[0].prop('content')).to.be.equal('noindex, nofollow');
 
     });
 
