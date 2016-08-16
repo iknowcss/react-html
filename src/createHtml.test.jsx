@@ -202,29 +202,23 @@ describe('createHtml()', () => {
   describe('env', () => {
     const ENV_SCRIPT_REGEXP = /^window\.process=\{env:(\{.*\})\};$/;
 
-    it('sets the process.env object when the env option is specified', () => {
-      const Html = createHtml({env: {
-        NODE_ENV: 'production'
-      }});
+    it('should create the first script which sets the process.env object when the env option is specified', () => {
+      const Html = createHtml({
+        env: {NODE_ENV: 'production'}
+      });
       const html = $(render(<Html/>).element);
-      const scripts = getScripts(html);
-
-      const envScript = scripts.filter(s => ENV_SCRIPT_REGEXP.test(s));
-      expect(envScript).to.have.length(1);
-      const envJson = envScript[0].match(ENV_SCRIPT_REGEXP)[1];
+      const envScript = getScripts(html)[0];
+      const envJson = envScript.match(ENV_SCRIPT_REGEXP)[1];
       expect(JSON.parse(envJson)).to.eql({
         NODE_ENV: 'production'
       });
     });
 
-    it('sets the process.env object to an empty object by default', () => {
+    it('should create the first script which sets the process.env object to an empty object by default', () => {
       const Html = createHtml();
       const html = $(render(<Html/>).element);
-      const scripts = getScripts(html);
-
-      const envScript = scripts.filter(s => ENV_SCRIPT_REGEXP.test(s));
-      expect(envScript).to.have.length(1);
-      const envJson = envScript[0].match(ENV_SCRIPT_REGEXP)[1];
+      const envScript = getScripts(html)[0];
+      const envJson = envScript.match(ENV_SCRIPT_REGEXP)[1];
       expect(JSON.parse(envJson)).to.eql({});
     });
   });
